@@ -1,0 +1,86 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "council-da-scraper"
+version = "1.0.0"
+description = "Australian Council Development Application Scraping Platform"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Rohit", email = "rohit@example.com"}
+]
+
+dependencies = [
+    # Web Framework
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+
+    # Database
+    "sqlalchemy>=2.0.25",
+    "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.9",
+    "alembic>=1.13.1",
+    "geoalchemy2>=0.14.3",
+
+    # Redis & Task Queue
+    "redis>=5.0.1",
+    "celery[redis]>=5.3.6",
+    "flower>=2.0.1",
+
+    # Scraping
+    "playwright>=1.41.0",
+    "beautifulsoup4>=4.12.3",
+    "lxml>=5.1.0",
+    "httpx>=0.26.0",
+    "aiohttp>=3.9.3",
+
+    # AI/ML
+    "anthropic>=0.18.0",
+
+    # Utilities
+    "python-dotenv>=1.0.0",
+    "tenacity>=8.2.3",
+    "structlog>=24.1.0",
+    "python-dateutil>=2.8.2",
+    "pytz>=2024.1",
+
+    # Data Processing
+    "pandas>=2.2.0",
+    "numpy>=1.26.3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.4",
+    "pytest-cov>=4.1.0",
+    "black>=24.1.1",
+    "ruff>=0.1.14",
+    "mypy>=1.8.0",
+    "pre-commit>=3.6.0",
+]
+
+[project.scripts]
+council-api = "src.api.main:run"
+council-worker = "src.orchestrator.worker:run"
+council-scrape = "src.orchestrator.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "N", "W"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

@@ -1,0 +1,66 @@
+# Celery Worker Dockerfile
+# For running scraper workers with browser support
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    build-essential \
+    libpq-dev \
+    # Playwright browser dependencies
+    libglib2.0-0 \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libdbus-1-3 \
+    libxcb1 \
+    libxkbcommon0 \
+    libx11-6 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libasound2 \
+    libatspi2.0-0 \
+    fonts-liberation \
+    xvfb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY pyproject.toml ./
+RUN pip install --no-cache-dir .
+
+# Install Playwright with browsers
+RUN pip install playwright && \
+    playwright install chromium --with-deps
+
+# Copy application code
+COPY src/ ./src/
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash appuser && \
+    chown -R appuser:appuser /app
+
+# Create directories for browser data
+RUN mkdir -p /tmp/playwright && \
+    chown -R appuser:appuser /tmp/playwright
+
+USER appuser
+
+# Environment
+ENV PYTHONPATH=/app \
+    PYTHONUNBUFFERED=1 \
+    PLAYWRIGHT_BROWSERS_PATH=/tmp/playwright
+
+# Default: Start Celery worker
+CMD ["celery", "-A", "src.orchestrator.celery_app", "worker", "--loglevel=info", "--concurrency=4"]
