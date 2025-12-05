@@ -29,6 +29,8 @@ def get_async_database_url(url: str) -> str:
     Supabase provides: postgresql://user:pass@host:5432/db
     SQLAlchemy async needs: postgresql+asyncpg://user:pass@host:5432/db
     """
+    if not url:
+        return "postgresql+asyncpg://localhost/council_da"  # Fallback for import
     if url.startswith("postgresql://"):
         return url.replace("postgresql://", "postgresql+asyncpg://", 1)
     elif url.startswith("postgres://"):
@@ -36,25 +38,51 @@ def get_async_database_url(url: str) -> str:
     return url
 
 
-# Create async engine with converted URL
-engine = create_async_engine(
-    get_async_database_url(settings.database_url),
-    pool_size=settings.db_pool_size,
-    max_overflow=settings.db_max_overflow,
-    echo=settings.api_debug,
-)
+# Lazy engine creation to avoid connection at import time
+_engine = None
+_async_session_factory = None
 
-# Create session factory
-async_session_factory = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
+
+def get_engine():
+    """Get or create the database engine (lazy initialization)."""
+    global _engine
+    if _engine is None:
+        _engine = create_async_engine(
+            get_async_database_url(settings.database_url),
+            pool_size=settings.db_pool_size,
+            max_overflow=settings.db_max_overflow,
+            echo=settings.api_debug,
+            pool_pre_ping=True,  # Verify connections before using
+        )
+    return _engine
+
+
+def get_session_factory():
+    """Get or create the session factory (lazy initialization)."""
+    global _async_session_factory
+    if _async_session_factory is None:
+        _async_session_factory = async_sessionmaker(
+            get_engine(),
+            class_=AsyncSession,
+            expire_on_commit=False,
+        )
+    return _async_session_factory
+
+
+# For backwards compatibility
+@property
+def engine():
+    return get_engine()
+
+
+@property
+def async_session_factory():
+    return get_session_factory()
 
 
 async def init_db() -> None:
     """Initialize database tables."""
-    async with engine.begin() as conn:
+    async with get_engine().begin() as conn:
         # Enable PostGIS extension
         await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'))
         await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "postgis"'))
@@ -66,7 +94,7 @@ async def init_db() -> None:
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     """Get database session for dependency injection."""
-    async with async_session_factory() as session:
+    async with get_session_factory()() as session:
         try:
             yield session
         finally:
@@ -76,7 +104,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 @asynccontextmanager
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """Context manager for database sessions."""
-    async with async_session_factory() as session:
+    async with get_session_factory()() as session:
         try:
             yield session
             await session.commit()
