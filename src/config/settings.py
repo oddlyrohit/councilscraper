@@ -49,7 +49,8 @@ class Settings(BaseSettings):
     supabase_url: Optional[str] = None
     supabase_anon_key: Optional[str] = None
     supabase_service_key: Optional[str] = None
-    gnaf_table_name: str = "gnaf_addresses"
+    gnaf_schema: str = "gnaf"
+    gnaf_table_name: str = "address_principals"
 
     # -------------------------------------------------------------------------
     # AI Services
