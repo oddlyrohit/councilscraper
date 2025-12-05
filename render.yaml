@@ -1,16 +1,16 @@
 # Render Blueprint - Council DA Scraper Platform
 # https://render.com/docs/blueprint-spec
 #
-# Database: Uses PropertyScope Supabase (not Render Postgres)
-# Set SUPABASE_URL and SUPABASE_ANON_KEY in environment variables
+# API Only - Scrapers run locally/externally to save costs
+# Database: PropertyScope Supabase
 
 services:
-  # FastAPI Web Service
+  # FastAPI Web Service (API only)
   - type: web
     name: councilscraper-api
     runtime: python
     region: singapore  # Closest to Australia
-    plan: starter
+    plan: starter  # $7/month
     buildCommand: |
       pip install --upgrade pip
       pip install -e .
@@ -20,20 +20,11 @@ services:
       - key: PYTHON_VERSION
         value: "3.11.6"
       - key: DATABASE_URL
-        sync: false  # Set to Supabase connection string
-      - key: REDIS_URL
-        fromService:
-          name: councilscraper-redis
-          type: redis
-          property: connectionString
-      - key: ANTHROPIC_API_KEY
-        sync: false
+        sync: false  # Supabase connection string
       - key: SUPABASE_URL
-        sync: false  # PropertyScope Supabase URL
+        sync: false  # https://xxx.supabase.co
       - key: SUPABASE_ANON_KEY
-        sync: false  # PropertyScope anon key
-      - key: SUPABASE_SERVICE_KEY
-        sync: false  # PropertyScope service key (for writes)
+        sync: false  # For GNAF geocoding
       - key: SECRET_KEY
         generateValue: true
       - key: LOG_LEVEL
@@ -42,78 +33,10 @@ services:
         value: "false"
     autoDeploy: true
 
-  # Celery Worker (Background Jobs)
-  - type: worker
-    name: councilscraper-worker
-    runtime: python
-    region: singapore
-    plan: starter
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -e .
-      pip install playwright
-      playwright install chromium --with-deps
-    startCommand: celery -A src.orchestrator.celery_app worker --loglevel=info --concurrency=2
-    envVars:
-      - key: PYTHON_VERSION
-        value: "3.11.6"
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        fromService:
-          name: councilscraper-redis
-          type: redis
-          property: connectionString
-      - key: CELERY_BROKER_URL
-        fromService:
-          name: councilscraper-redis
-          type: redis
-          property: connectionString
-      - key: ANTHROPIC_API_KEY
-        sync: false
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_ANON_KEY
-        sync: false
-      - key: SUPABASE_SERVICE_KEY
-        sync: false
-      - key: SCRAPER_HEADLESS
-        value: "true"
-      - key: SCRAPER_MAX_CONCURRENT
-        value: "2"
-    autoDeploy: true
-
-  # Celery Beat Scheduler
-  - type: worker
-    name: councilscraper-scheduler
-    runtime: python
-    region: singapore
-    plan: starter
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -e .
-    startCommand: celery -A src.orchestrator.celery_app beat --loglevel=info
-    envVars:
-      - key: PYTHON_VERSION
-        value: "3.11.6"
-      - key: REDIS_URL
-        fromService:
-          name: councilscraper-redis
-          type: redis
-          property: connectionString
-      - key: CELERY_BROKER_URL
-        fromService:
-          name: councilscraper-redis
-          type: redis
-          property: connectionString
-    autoDeploy: true
-
-  # Redis for Celery broker and caching
-  - type: redis
-    name: councilscraper-redis
-    region: singapore
-    plan: starter
-    maxmemoryPolicy: allkeys-lru
-    ipAllowList: []  # Only internal access
-
-# No databases section - using PropertyScope Supabase instead
+# Workers/scrapers run locally - not on Render
+# To run scrapers locally:
+#   1. pip install -e .
+#   2. pip install playwright && playwright install chromium
+#   3. Set environment variables (.env file)
+#   4. celery -A src.orchestrator.celery_app worker --loglevel=info
+#   5. celery -A src.orchestrator.celery_app beat --loglevel=info (in another terminal)
