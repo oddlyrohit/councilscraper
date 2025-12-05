@@ -282,28 +282,49 @@ class Geocoder:
     Main geocoding service with provider fallback and caching.
 
     Uses multiple providers in order of preference:
-    1. GNAF (highest accuracy for Australian addresses)
-    2. Google Maps (high accuracy, paid)
+    1. GNAF via Supabase (highest accuracy for Australian addresses, FREE)
+    2. Google Maps (high accuracy, paid - $5 per 1000 requests)
     3. Nominatim (free, rate-limited)
+
+    Default configuration uses GNAF + Nominatim (no API costs).
     """
 
     def __init__(
         self,
         google_api_key: Optional[str] = None,
-        gnaf_api_key: Optional[str] = None,
+        supabase_url: Optional[str] = None,
+        supabase_key: Optional[str] = None,
+        gnaf_table_name: str = "gnaf_addresses",
         enable_cache: bool = True,
     ):
         self.providers: list[GeocodingProvider] = []
         self.cache = GeocodingCache() if enable_cache else None
 
-        # Initialize providers in order of preference
-        if gnaf_api_key:
-            self.providers.append(GNAFGeocodingProvider(gnaf_api_key))
+        # Get settings for defaults
+        supabase_url = supabase_url or settings.supabase_url
+        supabase_key = supabase_key or settings.supabase_anon_key
+        google_api_key = google_api_key or settings.google_maps_api_key
 
+        # Initialize providers in order of preference
+        # 1. GNAF via Supabase (FREE, highest accuracy for AU)
+        if supabase_url and supabase_key:
+            try:
+                from src.services.geocoding.gnaf_supabase import SupabaseGNAFProvider
+                self.providers.append(SupabaseGNAFProvider(
+                    supabase_url=supabase_url,
+                    supabase_key=supabase_key,
+                    table_name=gnaf_table_name,
+                ))
+                logger.info("GNAF Supabase provider initialized (FREE geocoding)")
+            except Exception as e:
+                logger.warning(f"Failed to initialize GNAF Supabase provider: {e}")
+
+        # 2. Google Maps (PAID - only if explicitly configured)
         if google_api_key:
             self.providers.append(GoogleGeocodingProvider(google_api_key))
+            logger.info("Google Maps provider initialized (PAID - $5/1000 requests)")
 
-        # Always include free Nominatim as fallback
+        # 3. Always include free Nominatim as fallback
         self.providers.append(NominatimGeocodingProvider())
 
         logger.info(f"Geocoder initialized with providers: {[p.name for p in self.providers]}")

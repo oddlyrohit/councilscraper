@@ -44,10 +44,24 @@ class Settings(BaseSettings):
     api_version: str = "1.0.0"
 
     # -------------------------------------------------------------------------
+    # Supabase (for GNAF geocoding)
+    # -------------------------------------------------------------------------
+    supabase_url: Optional[str] = None
+    supabase_anon_key: Optional[str] = None
+    supabase_service_key: Optional[str] = None
+    gnaf_table_name: str = "gnaf_addresses"
+
+    # -------------------------------------------------------------------------
     # AI Services
     # -------------------------------------------------------------------------
     anthropic_api_key: Optional[str] = None
     anthropic_model: str = "claude-sonnet-4-20250514"
+
+    # -------------------------------------------------------------------------
+    # Geocoding
+    # -------------------------------------------------------------------------
+    google_maps_api_key: Optional[str] = None
+    geocoding_provider_priority: str = "gnaf_supabase,nominatim"  # Comma-separated
 
     # -------------------------------------------------------------------------
     # Scraping
