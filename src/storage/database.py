@@ -2,7 +2,7 @@
 
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import select, func, and_, or_, text
@@ -12,15 +12,27 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from src.config import settings
-from src.models import (
-    Base,
-    Council,
-    Application,
-    ApplicationDocument,
-    ScrapeLog,
-    FieldMappingModel,
-)
+
+# Lazy imports to avoid circular dependencies and connection at import time
+_Base = None
+_models_imported = False
+
+
+def _import_models():
+    """Import models lazily to avoid import-time database connection."""
+    global _Base, _models_imported
+    if not _models_imported:
+        from src.models import (
+            Base,
+            Council,
+            Application,
+            ApplicationDocument,
+            ScrapeLog,
+            FieldMappingModel,
+        )
+        _Base = Base
+        _models_imported = True
+    return _Base
 
 
 def get_async_database_url(url: str) -> str:
@@ -30,7 +42,7 @@ def get_async_database_url(url: str) -> str:
     SQLAlchemy async needs: postgresql+asyncpg://user:pass@host:5432/db
     """
     if not url:
-        return "postgresql+asyncpg://localhost/council_da"  # Fallback for import
+        return "postgresql+asyncpg://localhost/council_da"
     if url.startswith("postgresql://"):
         return url.replace("postgresql://", "postgresql+asyncpg://", 1)
     elif url.startswith("postgres://"):
@@ -38,7 +50,7 @@ def get_async_database_url(url: str) -> str:
     return url
 
 
-# Lazy engine creation to avoid connection at import time
+# Lazy engine creation
 _engine = None
 _async_session_factory = None
 
@@ -47,12 +59,13 @@ def get_engine():
     """Get or create the database engine (lazy initialization)."""
     global _engine
     if _engine is None:
+        from src.config import settings
         _engine = create_async_engine(
             get_async_database_url(settings.database_url),
             pool_size=settings.db_pool_size,
             max_overflow=settings.db_max_overflow,
             echo=settings.api_debug,
-            pool_pre_ping=True,  # Verify connections before using
+            pool_pre_ping=True,
         )
     return _engine
 
@@ -69,25 +82,14 @@ def get_session_factory():
     return _async_session_factory
 
 
-# For backwards compatibility
-@property
-def engine():
-    return get_engine()
-
-
-@property
-def async_session_factory():
-    return get_session_factory()
-
-
 async def init_db() -> None:
     """Initialize database tables."""
+    Base = _import_models()
     async with get_engine().begin() as conn:
         # Enable PostGIS extension
         await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'))
         await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "postgis"'))
         await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "pg_trgm"'))
-
         # Create all tables
         await conn.run_sync(Base.metadata.create_all)
 
@@ -120,6 +122,26 @@ class DatabaseManager:
 
     def __init__(self, session: Optional[AsyncSession] = None):
         self._session = session
+        self._models = None
+
+    def _get_models(self):
+        """Lazy import models."""
+        if self._models is None:
+            from src.models import (
+                Council,
+                Application,
+                ApplicationDocument,
+                ScrapeLog,
+                FieldMappingModel,
+            )
+            self._models = {
+                'Council': Council,
+                'Application': Application,
+                'ApplicationDocument': ApplicationDocument,
+                'ScrapeLog': ScrapeLog,
+                'FieldMappingModel': FieldMappingModel,
+            }
+        return self._models
 
     @asynccontextmanager
     async def session(self) -> AsyncGenerator[AsyncSession, None]:
@@ -134,32 +156,40 @@ class DatabaseManager:
     # Council Operations
     # -------------------------------------------------------------------------
 
-    async def get_council_by_code(self, code: str) -> Optional[Council]:
+    async def get_council_by_code(self, code: str):
         """Get council by code."""
+        models = self._get_models()
+        Council = models['Council']
         async with self.session() as session:
             result = await session.execute(
                 select(Council).where(Council.code == code)
             )
             return result.scalar_one_or_none()
 
-    async def get_all_councils(self) -> list[Council]:
+    async def get_all_councils(self):
         """Get all councils."""
+        models = self._get_models()
+        Council = models['Council']
         async with self.session() as session:
             result = await session.execute(
                 select(Council).order_by(Council.tier, Council.name)
             )
             return list(result.scalars().all())
 
-    async def get_councils_by_tier(self, tier: int) -> list[Council]:
+    async def get_councils_by_tier(self, tier: int):
         """Get councils by tier."""
+        models = self._get_models()
+        Council = models['Council']
         async with self.session() as session:
             result = await session.execute(
                 select(Council).where(Council.tier == tier).order_by(Council.name)
             )
             return list(result.scalars().all())
 
-    async def upsert_council(self, council_data: dict) -> Council:
+    async def upsert_council(self, council_data: dict):
         """Insert or update a council."""
+        models = self._get_models()
+        Council = models['Council']
         async with self.session() as session:
             existing = await session.execute(
                 select(Council).where(Council.code == council_data["code"])
@@ -179,6 +209,8 @@ class DatabaseManager:
 
     async def count_active_councils(self) -> int:
         """Count councils with active scrapers."""
+        models = self._get_models()
+        Council = models['Council']
         async with self.session() as session:
             result = await session.execute(
                 select(func.count(Council.id)).where(Council.scraper_status == "active")
@@ -189,18 +221,20 @@ class DatabaseManager:
     # Application Operations
     # -------------------------------------------------------------------------
 
-    async def get_application_by_id(self, app_id: UUID) -> Optional[Application]:
+    async def get_application_by_id(self, app_id: UUID):
         """Get application by ID."""
+        models = self._get_models()
+        Application = models['Application']
         async with self.session() as session:
             result = await session.execute(
                 select(Application).where(Application.id == app_id)
             )
             return result.scalar_one_or_none()
 
-    async def get_application_by_da_number(
-        self, council_id: int, da_number: str
-    ) -> Optional[Application]:
+    async def get_application_by_da_number(self, council_id: int, da_number: str):
         """Get application by council and DA number."""
+        models = self._get_models()
+        Application = models['Application']
         async with self.session() as session:
             result = await session.execute(
                 select(Application).where(
@@ -226,8 +260,12 @@ class DatabaseManager:
         search_text: Optional[str] = None,
         limit: int = 50,
         offset: int = 0,
-    ) -> tuple[list[Application], int]:
+    ) -> tuple[list, int]:
         """Search applications with filters."""
+        models = self._get_models()
+        Application = models['Application']
+        Council = models['Council']
+
         async with self.session() as session:
             query = select(Application).join(Council)
             count_query = select(func.count(Application.id)).join(Council)
@@ -277,8 +315,11 @@ class DatabaseManager:
 
             return applications, total
 
-    async def upsert_application(self, app_data: dict) -> tuple[Application, bool]:
+    async def upsert_application(self, app_data: dict) -> tuple:
         """Insert or update an application. Returns (application, is_new)."""
+        models = self._get_models()
+        Application = models['Application']
+
         async with self.session() as session:
             existing = await session.execute(
                 select(Application).where(
@@ -307,21 +348,23 @@ class DatabaseManager:
         """Bulk upsert applications."""
         results = {"new": 0, "updated": 0, "errors": 0}
 
-        async with self.session() as session:
-            for app_data in applications:
-                try:
-                    _, is_new = await self.upsert_application(app_data)
-                    if is_new:
-                        results["new"] += 1
-                    else:
-                        results["updated"] += 1
-                except Exception:
-                    results["errors"] += 1
+        for app_data in applications:
+            try:
+                _, is_new = await self.upsert_application(app_data)
+                if is_new:
+                    results["new"] += 1
+                else:
+                    results["updated"] += 1
+            except Exception:
+                results["errors"] += 1
 
         return results
 
     async def count_applications(self) -> int:
         """Count total applications."""
+        models = self._get_models()
+        Application = models['Application']
+
         async with self.session() as session:
             result = await session.execute(select(func.count(Application.id)))
             return result.scalar() or 0
@@ -332,10 +375,12 @@ class DatabaseManager:
         lng: float,
         radius_km: float = 5.0,
         limit: int = 50,
-    ) -> list[Application]:
+    ):
         """Get applications within radius of a point."""
+        models = self._get_models()
+        Application = models['Application']
+
         async with self.session() as session:
-            # Use PostGIS ST_DWithin for efficient spatial query
             point = func.ST_SetSRID(func.ST_MakePoint(lng, lat), 4326)
             distance_meters = radius_km * 1000
 
@@ -357,8 +402,11 @@ class DatabaseManager:
     # Scrape Log Operations
     # -------------------------------------------------------------------------
 
-    async def log_scrape_run(self, log_data: dict) -> ScrapeLog:
+    async def log_scrape_run(self, log_data: dict):
         """Log a scrape run."""
+        models = self._get_models()
+        ScrapeLog = models['ScrapeLog']
+
         async with self.session() as session:
             log = ScrapeLog(**log_data)
             session.add(log)
@@ -367,6 +415,9 @@ class DatabaseManager:
 
     async def count_recent_scrapes(self, hours: int = 24) -> int:
         """Count scrapes in last N hours."""
+        models = self._get_models()
+        ScrapeLog = models['ScrapeLog']
+
         async with self.session() as session:
             cutoff = datetime.utcnow() - timedelta(hours=hours)
             result = await session.execute(
@@ -376,6 +427,10 @@ class DatabaseManager:
 
     async def get_failed_scrapers(self, hours: int = 24, min_failures: int = 3) -> list[str]:
         """Get council codes with repeated failures."""
+        models = self._get_models()
+        Council = models['Council']
+        ScrapeLog = models['ScrapeLog']
+
         async with self.session() as session:
             cutoff = datetime.utcnow() - timedelta(hours=hours)
             result = await session.execute(
@@ -396,16 +451,22 @@ class DatabaseManager:
     # Field Mapping Operations
     # -------------------------------------------------------------------------
 
-    async def get_field_mapping(self, council_id: int) -> Optional[FieldMappingModel]:
+    async def get_field_mapping(self, council_id: int):
         """Get field mapping for a council."""
+        models = self._get_models()
+        FieldMappingModel = models['FieldMappingModel']
+
         async with self.session() as session:
             result = await session.execute(
                 select(FieldMappingModel).where(FieldMappingModel.council_id == council_id)
             )
             return result.scalar_one_or_none()
 
-    async def save_field_mapping(self, council_id: int, mapping_data: dict) -> FieldMappingModel:
+    async def save_field_mapping(self, council_id: int, mapping_data: dict):
         """Save field mapping for a council."""
+        models = self._get_models()
+        FieldMappingModel = models['FieldMappingModel']
+
         async with self.session() as session:
             existing = await session.execute(
                 select(FieldMappingModel).where(FieldMappingModel.council_id == council_id)
@@ -433,7 +494,3 @@ class DatabaseManager:
 
             await session.flush()
             return mapping
-
-
-# Import timedelta for the functions above
-from datetime import timedelta

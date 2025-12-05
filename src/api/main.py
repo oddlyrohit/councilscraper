@@ -3,6 +3,7 @@ FastAPI Application Entry Point
 Council Planning Data API
 """
 
+import logging
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
@@ -11,16 +12,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from src.config import settings
-from src.storage.database import init_db
 
 from .routes import applications, councils, search, webhooks, admin, health
+
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan handler."""
-    # Startup
-    await init_db()
+    # Startup - try to init DB but don't fail if unavailable
+    try:
+        from src.storage.database import init_db
+        await init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.warning(f"Database initialization skipped: {e}")
+        logger.warning("API will start but database features may not work")
     yield
     # Shutdown
 
