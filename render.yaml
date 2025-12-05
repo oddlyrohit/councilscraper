@@ -7,7 +7,7 @@ services:
     name: councilscraper-api
     runtime: python
     region: singapore  # Closest to Australia
-    plan: starter  # $7/month, upgrade as needed
+    plan: starter
     buildCommand: |
       pip install --upgrade pip
       pip install -e .
@@ -27,8 +27,10 @@ services:
           property: connectionString
       - key: ANTHROPIC_API_KEY
         sync: false  # Set manually in Render dashboard
-      - key: GOOGLE_MAPS_API_KEY
-        sync: false
+      - key: SUPABASE_URL
+        sync: false  # PropertyScope Supabase URL
+      - key: SUPABASE_ANON_KEY
+        sync: false  # PropertyScope anon key for GNAF
       - key: SECRET_KEY
         generateValue: true
       - key: LOG_LEVEL
@@ -68,6 +70,10 @@ services:
           property: connectionString
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
       - key: SCRAPER_HEADLESS
         value: "true"
       - key: SCRAPER_MAX_CONCURRENT
@@ -103,13 +109,15 @@ services:
   - type: redis
     name: councilscraper-redis
     region: singapore
-    plan: starter  # $7/month, 25MB
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
     ipAllowList: []  # Only internal access
 
 databases:
-  # PostgreSQL Database
+  # PostgreSQL Database (new Render plan naming)
   - name: councilscraper-db
     region: singapore
-    plan: starter  # $7/month, 1GB storage
-    postgresMajorVersion: "15"
+    plan: basic  # New plan name: basic ($7/month), standard ($20/month), pro ($95/month)
+    databaseName: council_da
+    postgresMajorVersion: "16"
     ipAllowList: []  # Only internal access
