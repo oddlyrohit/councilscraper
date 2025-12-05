@@ -23,13 +23,20 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Application lifespan handler."""
     # Startup - try to init DB but don't fail if unavailable
-    try:
-        from src.storage.database import init_db
-        await init_db()
-        logger.info("Database initialized successfully")
-    except Exception as e:
-        logger.warning(f"Database initialization skipped: {e}")
-        logger.warning("API will start but database features may not work")
+    from src.config import settings
+
+    if not settings.database_url:
+        logger.warning("DATABASE_URL not set - running in limited mode")
+        logger.warning("Set DATABASE_URL environment variable to enable database features")
+    else:
+        logger.info(f"Database URL configured (host: {settings.database_url.split('@')[-1].split('/')[0] if '@' in settings.database_url else 'unknown'})")
+        try:
+            from src.storage.database import init_db
+            await init_db()
+            logger.info("Database initialized successfully")
+        except Exception as e:
+            logger.warning(f"Database initialization skipped: {e}")
+            logger.warning("API will start but database features may not work")
     yield
     # Shutdown
 

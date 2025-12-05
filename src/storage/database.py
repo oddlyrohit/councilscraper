@@ -42,7 +42,8 @@ def get_async_database_url(url: str) -> str:
     SQLAlchemy async needs: postgresql+asyncpg://user:pass@host:5432/db
     """
     if not url:
-        return "postgresql+asyncpg://localhost/council_da"
+        # Return None to indicate no database configured
+        return None
     if url.startswith("postgresql://"):
         return url.replace("postgresql://", "postgresql+asyncpg://", 1)
     elif url.startswith("postgres://"):
@@ -60,8 +61,14 @@ def get_engine():
     global _engine
     if _engine is None:
         from src.config import settings
+        db_url = get_async_database_url(settings.database_url)
+        if db_url is None:
+            raise RuntimeError(
+                "DATABASE_URL environment variable is not set. "
+                "Please configure it in Render → Environment settings with your Supabase connection string."
+            )
         _engine = create_async_engine(
-            get_async_database_url(settings.database_url),
+            db_url,
             pool_size=settings.db_pool_size,
             max_overflow=settings.db_max_overflow,
             echo=settings.api_debug,

@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     # -------------------------------------------------------------------------
     # Database
     # -------------------------------------------------------------------------
-    database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/council_da"
-    database_url_sync: str = "postgresql://postgres:password@localhost:5432/council_da"
+    database_url: Optional[str] = None  # Must be set via DATABASE_URL env var
+    database_url_sync: Optional[str] = None
     db_pool_size: int = 20
     db_max_overflow: int = 10
 
