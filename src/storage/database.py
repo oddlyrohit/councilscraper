@@ -23,9 +23,22 @@ from src.models import (
 )
 
 
-# Create async engine
+def get_async_database_url(url: str) -> str:
+    """Convert database URL to async format for SQLAlchemy.
+
+    Supabase provides: postgresql://user:pass@host:5432/db
+    SQLAlchemy async needs: postgresql+asyncpg://user:pass@host:5432/db
+    """
+    if url.startswith("postgresql://"):
+        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    elif url.startswith("postgres://"):
+        return url.replace("postgres://", "postgresql+asyncpg://", 1)
+    return url
+
+
+# Create async engine with converted URL
 engine = create_async_engine(
-    settings.database_url,
+    get_async_database_url(settings.database_url),
     pool_size=settings.db_pool_size,
     max_overflow=settings.db_max_overflow,
     echo=settings.api_debug,
