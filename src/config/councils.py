@@ -1357,10 +1357,403 @@ TIER_4_COUNCILS = [
 
 
 # =============================================================================
+# TIER 5: Additional Councils (201-250) - Scrape weekly
+# =============================================================================
+
+TIER_5_COUNCILS = [
+    # Victoria - Additional Melbourne Metro
+    CouncilConfig(
+        code="MANNINGHAM", name="City of Manningham",
+        state=State.VIC, population=130000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="WHITEHORSE", name="City of Whitehorse",
+        state=State.VIC, population=180000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="KINGSTON", name="City of Kingston",
+        state=State.VIC, population=165000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="BAYSIDE_VIC", name="City of Bayside",
+        state=State.VIC, population=110000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="GLEN_EIRA", name="City of Glen Eira",
+        state=State.VIC, population=155000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="STONNINGTON", name="City of Stonnington",
+        state=State.VIC, population=118000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="HOBSONS_BAY", name="City of Hobsons Bay",
+        state=State.VIC, population=100000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="MAROONDAH", name="City of Maroondah",
+        state=State.VIC, population=120000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="YARRA", name="City of Yarra",
+        state=State.VIC, population=100000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="PORT_PHILLIP", name="City of Port Phillip",
+        state=State.VIC, population=115000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="MARIBYRNONG", name="City of Maribyrnong",
+        state=State.VIC, population=95000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="NILLUMBIK", name="Nillumbik Shire Council",
+        state=State.VIC, population=68000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="YARRA_RANGES", name="Yarra Ranges Council",
+        state=State.VIC, population=160000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="CARDINIA", name="Cardinia Shire Council",
+        state=State.VIC, population=125000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="MORNINGTON", name="Mornington Peninsula Shire",
+        state=State.VIC, population=170000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+
+    # New South Wales - Additional Sydney Metro
+    CouncilConfig(
+        code="RYDE", name="City of Ryde",
+        state=State.NSW, population=130000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="LANE_COVE", name="Lane Cove Council",
+        state=State.NSW, population=40000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="WILLOUGHBY", name="Willoughby City Council",
+        state=State.NSW, population=80000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="MOSMAN", name="Mosman Council",
+        state=State.NSW, population=31000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="NORTH_SYDNEY", name="North Sydney Council",
+        state=State.NSW, population=75000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="WAVERLEY", name="Waverley Council",
+        state=State.NSW, population=75000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="WOOLLAHRA", name="Woollahra Council",
+        state=State.NSW, population=60000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="HUNTERS_HILL", name="Hunter's Hill Council",
+        state=State.NSW, population=15000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="CANADA_BAY", name="City of Canada Bay",
+        state=State.NSW, population=95000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="BURWOOD", name="Burwood Council",
+        state=State.NSW, population=40000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+    CouncilConfig(
+        code="STRATHFIELD", name="Strathfield Council",
+        state=State.NSW, population=45000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW, metro_area="Sydney",
+    ),
+
+    # New South Wales - Regional
+    CouncilConfig(
+        code="ARMIDALE", name="Armidale Regional Council",
+        state=State.NSW, population=30000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="BROKEN_HILL", name="Broken Hill City Council",
+        state=State.NSW, population=18000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="MID_COAST", name="MidCoast Council",
+        state=State.NSW, population=95000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="KEMPSEY", name="Kempsey Shire Council",
+        state=State.NSW, population=30000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="NAMBUCCA", name="Nambucca Valley Council",
+        state=State.NSW, population=20000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="BELLINGEN", name="Bellingen Shire Council",
+        state=State.NSW, population=13000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="PARKES", name="Parkes Shire Council",
+        state=State.NSW, population=16000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="LITHGOW", name="Lithgow City Council",
+        state=State.NSW, population=22000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="MUSWELLBROOK", name="Muswellbrook Shire Council",
+        state=State.NSW, population=17000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="UPPER_HUNTER", name="Upper Hunter Shire Council",
+        state=State.NSW, population=15000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+
+    # Queensland - Additional
+    CouncilConfig(
+        code="DOUGLAS", name="Douglas Shire Council",
+        state=State.QLD, population=12000, tier=5,
+        portal_type=PortalType.DEVELOPMENT_I_QLD,
+    ),
+    CouncilConfig(
+        code="MAREEBA", name="Mareeba Shire Council",
+        state=State.QLD, population=22000, tier=5,
+        portal_type=PortalType.DEVELOPMENT_I_QLD,
+    ),
+    CouncilConfig(
+        code="WHITSUNDAY", name="Whitsunday Regional Council",
+        state=State.QLD, population=38000, tier=5,
+        portal_type=PortalType.DEVELOPMENT_I_QLD,
+    ),
+    CouncilConfig(
+        code="BANANA", name="Banana Shire Council",
+        state=State.QLD, population=15000, tier=5,
+        portal_type=PortalType.DEVELOPMENT_I_QLD,
+    ),
+    CouncilConfig(
+        code="GOONDIWINDI", name="Goondiwindi Regional Council",
+        state=State.QLD, population=12000, tier=5,
+        portal_type=PortalType.DEVELOPMENT_I_QLD,
+    ),
+    CouncilConfig(
+        code="CHARTERS_TOWERS", name="Charters Towers Regional Council",
+        state=State.QLD, population=12000, tier=5,
+        portal_type=PortalType.DEVELOPMENT_I_QLD,
+    ),
+    CouncilConfig(
+        code="MOUNT_ISA", name="Mount Isa City Council",
+        state=State.QLD, population=18000, tier=5,
+        portal_type=PortalType.DEVELOPMENT_I_QLD,
+    ),
+
+    # South Australia - Additional
+    CouncilConfig(
+        code="HOLDFAST_BAY", name="City of Holdfast Bay",
+        state=State.SA, population=38000, tier=5,
+        portal_type=PortalType.PLAN_SA, metro_area="Adelaide",
+    ),
+    CouncilConfig(
+        code="MITCHAM", name="City of Mitcham",
+        state=State.SA, population=68000, tier=5,
+        portal_type=PortalType.PLAN_SA, metro_area="Adelaide",
+    ),
+    CouncilConfig(
+        code="ADELAIDE", name="City of Adelaide",
+        state=State.SA, population=26000, tier=5,
+        portal_type=PortalType.PLAN_SA, metro_area="Adelaide",
+    ),
+    CouncilConfig(
+        code="WALKERVILLE", name="Town of Walkerville",
+        state=State.SA, population=8000, tier=5,
+        portal_type=PortalType.PLAN_SA, metro_area="Adelaide",
+    ),
+    CouncilConfig(
+        code="VICTOR_HARBOR", name="City of Victor Harbor",
+        state=State.SA, population=17000, tier=5,
+        portal_type=PortalType.PLAN_SA,
+    ),
+    CouncilConfig(
+        code="LIGHT", name="Light Regional Council",
+        state=State.SA, population=16000, tier=5,
+        portal_type=PortalType.PLAN_SA,
+    ),
+    CouncilConfig(
+        code="CLARE_GILBERT", name="Clare and Gilbert Valleys Council",
+        state=State.SA, population=10000, tier=5,
+        portal_type=PortalType.PLAN_SA,
+    ),
+    CouncilConfig(
+        code="PORT_LINCOLN", name="City of Port Lincoln",
+        state=State.SA, population=15000, tier=5,
+        portal_type=PortalType.PLAN_SA,
+    ),
+
+    # Western Australia - Additional Perth Metro
+    CouncilConfig(
+        code="CAMBRIDGE", name="Town of Cambridge",
+        state=State.WA, population=30000, tier=5,
+        portal_type=PortalType.PLAN_WA, metro_area="Perth",
+    ),
+    CouncilConfig(
+        code="CLAREMONT", name="Town of Claremont",
+        state=State.WA, population=11000, tier=5,
+        portal_type=PortalType.PLAN_WA, metro_area="Perth",
+    ),
+    CouncilConfig(
+        code="COTTESLOE", name="Town of Cottesloe",
+        state=State.WA, population=8000, tier=5,
+        portal_type=PortalType.PLAN_WA, metro_area="Perth",
+    ),
+    CouncilConfig(
+        code="NEDLANDS", name="City of Nedlands",
+        state=State.WA, population=24000, tier=5,
+        portal_type=PortalType.PLAN_WA, metro_area="Perth",
+    ),
+    CouncilConfig(
+        code="SUBIACO", name="City of Subiaco",
+        state=State.WA, population=21000, tier=5,
+        portal_type=PortalType.PLAN_WA, metro_area="Perth",
+    ),
+    CouncilConfig(
+        code="KALAMUNDA", name="City of Kalamunda",
+        state=State.WA, population=60000, tier=5,
+        portal_type=PortalType.PLAN_WA, metro_area="Perth",
+    ),
+    CouncilConfig(
+        code="MUNDARING", name="Shire of Mundaring",
+        state=State.WA, population=40000, tier=5,
+        portal_type=PortalType.PLAN_WA, metro_area="Perth",
+    ),
+    CouncilConfig(
+        code="SERPENTINE", name="Shire of Serpentine-Jarrahdale",
+        state=State.WA, population=35000, tier=5,
+        portal_type=PortalType.PLAN_WA, metro_area="Perth",
+    ),
+    CouncilConfig(
+        code="BUSSELTON", name="City of Busselton",
+        state=State.WA, population=42000, tier=5,
+        portal_type=PortalType.PLAN_WA,
+    ),
+    CouncilConfig(
+        code="BROOME", name="Shire of Broome",
+        state=State.WA, population=18000, tier=5,
+        portal_type=PortalType.PLAN_WA,
+    ),
+
+    # Tasmania - Additional
+    CouncilConfig(
+        code="BRIGHTON", name="Brighton Council",
+        state=State.TAS, population=18000, tier=5,
+        portal_type=PortalType.EPATHWAY, metro_area="Hobart",
+    ),
+    CouncilConfig(
+        code="SORELL", name="Sorell Council",
+        state=State.TAS, population=17000, tier=5,
+        portal_type=PortalType.EPATHWAY, metro_area="Hobart",
+    ),
+    CouncilConfig(
+        code="DEVONPORT", name="Devonport City Council",
+        state=State.TAS, population=26000, tier=5,
+        portal_type=PortalType.EPATHWAY,
+    ),
+    CouncilConfig(
+        code="BURNIE", name="Burnie City Council",
+        state=State.TAS, population=20000, tier=5,
+        portal_type=PortalType.EPATHWAY,
+    ),
+    CouncilConfig(
+        code="CENTRAL_COAST_TAS", name="Central Coast Council (TAS)",
+        state=State.TAS, population=22000, tier=5,
+        portal_type=PortalType.EPATHWAY,
+    ),
+    CouncilConfig(
+        code="WEST_TAMAR", name="West Tamar Council",
+        state=State.TAS, population=24000, tier=5,
+        portal_type=PortalType.EPATHWAY, metro_area="Launceston",
+    ),
+    CouncilConfig(
+        code="MEANDER_VALLEY", name="Meander Valley Council",
+        state=State.TAS, population=20000, tier=5,
+        portal_type=PortalType.EPATHWAY, metro_area="Launceston",
+    ),
+    CouncilConfig(
+        code="HUON_VALLEY", name="Huon Valley Council",
+        state=State.TAS, population=18000, tier=5,
+        portal_type=PortalType.EPATHWAY, metro_area="Hobart",
+    ),
+
+    # Additional to reach 250
+    CouncilConfig(
+        code="BANYULE", name="City of Banyule",
+        state=State.VIC, population=130000, tier=5,
+        portal_type=PortalType.SPEAR_VIC, metro_area="Melbourne",
+    ),
+    CouncilConfig(
+        code="MORETON_BAY_QLD", name="Moreton Bay Regional Council",
+        state=State.QLD, population=480000, tier=5,
+        portal_type=PortalType.DEVELOPMENT_I_QLD, metro_area="Brisbane",
+    ),
+    CouncilConfig(
+        code="SNOWY_VALLEYS", name="Snowy Valleys Council",
+        state=State.NSW, population=15000, tier=5,
+        portal_type=PortalType.EPLANNING_NSW,
+    ),
+    CouncilConfig(
+        code="WARATAH_WYNYARD", name="Waratah-Wynyard Council",
+        state=State.TAS, population=14000, tier=5,
+        portal_type=PortalType.EPATHWAY,
+    ),
+    CouncilConfig(
+        code="LATROBE_TAS", name="Latrobe Council",
+        state=State.TAS, population=12000, tier=5,
+        portal_type=PortalType.EPATHWAY,
+    ),
+]
+
+
+# =============================================================================
 # ALL COUNCILS COMBINED
 # =============================================================================
 
-ALL_COUNCILS = TIER_1_COUNCILS + TIER_2_COUNCILS + TIER_3_COUNCILS + TIER_4_COUNCILS
+ALL_COUNCILS = TIER_1_COUNCILS + TIER_2_COUNCILS + TIER_3_COUNCILS + TIER_4_COUNCILS + TIER_5_COUNCILS
 
 
 def get_council_by_code(code: str) -> Optional[CouncilConfig]:
@@ -1393,6 +1786,7 @@ COUNCIL_STATS = {
     "tier_2": len(TIER_2_COUNCILS),
     "tier_3": len(TIER_3_COUNCILS),
     "tier_4": len(TIER_4_COUNCILS),
+    "tier_5": len(TIER_5_COUNCILS),
     "by_state": {
         state.value: len(get_councils_by_state(state))
         for state in State

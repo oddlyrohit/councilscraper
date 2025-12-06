@@ -39,52 +39,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Tier definitions (council codes)
-TIER_1_COUNCILS = [
-    # NSW Major
-    "sydney_city", "parramatta", "inner_west", "north_sydney",
-    "randwick", "waverley", "woollahra", "bayside",
-    # VIC Major
-    "melbourne", "yarra", "port_phillip", "stonnington",
-    # QLD Major
-    "brisbane", "gold_coast", "sunshine_coast",
-    # WA Major
-    "perth", "stirling", "joondalup",
-    # SA Major
-    "adelaide",
-]
-
-TIER_2_COUNCILS = [
-    # NSW Suburban
-    "blacktown", "penrith", "liverpool", "campbelltown",
-    "canterbury_bankstown", "cumberland", "fairfield", "sutherland",
-    "northern_beaches", "hornsby", "ku_ring_gai", "ryde",
-    "lane_cove", "willoughby", "mosman", "hunters_hill",
-    "canada_bay", "burwood", "strathfield", "georges_river",
-    # NSW Regional
-    "newcastle", "wollongong", "central_coast", "lake_macquarie",
-    # VIC Suburban
-    "monash", "whitehorse", "manningham", "boroondara",
-    "glen_eira", "bayside_vic", "kingston", "casey",
-    "greater_dandenong", "knox", "maroondah", "darebin",
-    "banyule", "moreland", "moonee_valley", "hobsons_bay",
-    # VIC Regional
-    "geelong", "ballarat", "bendigo",
-    # QLD Suburban
-    "moreton_bay", "logan", "ipswich", "redland",
-    # Other states
-    "canberra", "hobart", "darwin",
-]
-
-# All remaining councils are Tier 3
-
+# Use tier definitions from the councils config
+from src.config.councils import (
+    TIER_1_COUNCILS as T1,
+    TIER_2_COUNCILS as T2,
+    TIER_3_COUNCILS as T3,
+    TIER_4_COUNCILS as T4,
+    TIER_5_COUNCILS as T5,
+)
 
 def get_tier_councils(tier: int, batch: int = None) -> list:
     """Get councils for specified tier, optionally split into batches."""
     if tier == 1:
-        councils = TIER_1_COUNCILS
+        councils = [c.code for c in T1]
     elif tier == 2:
-        councils = TIER_2_COUNCILS
+        councils = [c.code for c in T2]
         if batch is not None:
             # Split tier 2 into 3 batches
             batch_size = len(councils) // 3 + 1
@@ -92,11 +61,23 @@ def get_tier_councils(tier: int, batch: int = None) -> list:
             end = start + batch_size
             councils = councils[start:end]
     elif tier == 3:
-        # All councils not in tier 1 or 2
-        tier_1_2 = set(TIER_1_COUNCILS + TIER_2_COUNCILS)
-        councils = [c.code for c in ALL_COUNCILS if c.code not in tier_1_2]
+        councils = [c.code for c in T3]
         if batch is not None:
             # Split tier 3 into 7 batches (one per day)
+            batch_size = len(councils) // 7 + 1
+            start = (batch - 1) * batch_size
+            end = start + batch_size
+            councils = councils[start:end]
+    elif tier == 4:
+        councils = [c.code for c in T4]
+        if batch is not None:
+            batch_size = len(councils) // 7 + 1
+            start = (batch - 1) * batch_size
+            end = start + batch_size
+            councils = councils[start:end]
+    elif tier == 5:
+        councils = [c.code for c in T5]
+        if batch is not None:
             batch_size = len(councils) // 7 + 1
             start = (batch - 1) * batch_size
             end = start + batch_size
